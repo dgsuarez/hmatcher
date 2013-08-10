@@ -10,12 +10,13 @@ data Line = Line {
 } deriving (Show, Eq)
 
 instance Ord Line where
-  l1 `compare` l2 = [dispersion m1, position m1] `compare` [dispersion m2, position m2]
+  l1 `compare` l2 = (index m1) `compare` (index m2)
     where 
       m1 = matchIndexes l1
       m2 = matchIndexes l2
-      dispersion = foldr1 (-) -- should be standard deviation
-      position = foldr1 (+) -- mean?
+      index l = (avg l) * (stdev l)
+      stdev l = sqrt $ avg $ map (\x -> (realToFrac x - (avg l)) ^ 2) l
+      avg l = realToFrac (sum l) / realToFrac (length l)
 
 makeLine :: String -> Line
 makeLine s = Line {matchIndexes = [], current = s, original = s}
