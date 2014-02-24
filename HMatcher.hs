@@ -3,36 +3,36 @@ module HMatcher (getNMatches) where
 import Data.Maybe
 import Data.List
 
-data Line = Line {
+data Match = Match {
   matchIndexes :: [Int],
   original :: String,
   current :: String
 } deriving (Show, Eq)
 
-instance Ord Line where
+instance Ord Match where
   l1 `compare` l2 = (index l1) `compare` (index l2)
     where 
       index l = ((sum $ matchIndexes l) + 1) * (length $ original l)
 
-makeLine :: String -> Line
-makeLine s = Line {matchIndexes = [], current = (reverse s), original = s}
+makeMatch :: String -> Match
+makeMatch s = Match {matchIndexes = [], current = (reverse s), original = s}
 
-updateLine :: Line -> Int -> Line
-updateLine l x = l {matchIndexes = x:(matchIndexes l), current = drop (x+1) (current l)}
+updateMatch :: Match -> Int -> Match
+updateMatch l x = l {matchIndexes = x:(matchIndexes l), current = drop (x+1) (current l)}
 
-matchIndexesForChar :: Char -> Line -> Maybe Int
+matchIndexesForChar :: Char -> Match -> Maybe Int
 matchIndexesForChar c line = elemIndex c $ current line
 
-matchChar :: Char -> Line -> Maybe Line
-matchChar c line = fmap (updateLine line) (matchIndexesForChar c line)
+matchChar :: Char -> Match -> Maybe Match
+matchChar c line = fmap (updateMatch line) (matchIndexesForChar c line)
 
-charFilter :: Char -> [Line] -> [Line]
+charFilter :: Char -> [Match] -> [Match]
 charFilter c lines = map fromJust $ filter isJust $ map (matchChar c) lines
 
-getMatches :: String -> [Line] -> [Line]
+getMatches :: String -> [Match] -> [Match]
 getMatches [] lines = lines
 getMatches (c:cs) lines = getMatches cs $ charFilter c lines
 
 getNMatches :: String -> Int -> [String] -> [String]
-getNMatches pattern n corpus = take n $ map original $ sort $ getMatches (reverse pattern) $ map makeLine corpus
+getNMatches pattern n corpus = take n $ map original $ sort $ getMatches (reverse pattern) $ map makeMatch corpus
 
