@@ -12,7 +12,10 @@ data Match = Match {
 instance Ord Match where
   l1 `compare` l2 = (index l1) `compare` (index l2)
     where 
-      index l = ((sum $ matchIndexes l) + 1) * (length $ original l)
+      index l = (sumIndices l) * (chunckCount l) * (originalLength l)
+      sumIndices l = (+ 1) $ sum $ matchIndexes l
+      originalLength l = length $ original l
+      chunckCount l = (+ 1) $ length $ filter (> 0) (matchIndexes l)
 
 makeMatch :: String -> Match
 makeMatch s = Match {matchIndexes = [], current = (reverse s), original = s}
