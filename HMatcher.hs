@@ -30,7 +30,7 @@ matchChar :: Char -> Match -> Maybe Match
 matchChar c line = fmap (updateMatch line) (matchIndexesForChar c line)
 
 charFilter :: Char -> [Match] -> [Match]
-charFilter c lines = map fromJust $ filter isJust $ map (matchChar c) lines
+charFilter c lines = catMaybes $ map (matchChar c) lines
 
 getMatches :: String -> [Match] -> [Match]
 getMatches [] lines = lines
