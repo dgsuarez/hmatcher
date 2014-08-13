@@ -10,18 +10,18 @@ data Match = Match {
 } deriving (Show, Eq)
 
 instance Ord Match where
-  l1 `compare` l2 = (index l1) `compare` (index l2)
+  l1 `compare` l2 = index l1 `compare` index l2
     where 
-      index l = (sumIndices l) * (chunckCount l) * (originalLength l)
+      index l = sumIndices l * chunckCount l * originalLength l
       sumIndices l = (+ 1) $ sum $ matchIndexes l
       originalLength l = length $ original l
       chunckCount l = (+ 1) $ length $ filter (> 0) (matchIndexes l)
 
 makeMatch :: String -> Match
-makeMatch s = Match {matchIndexes = [], current = (reverse s), original = s}
+makeMatch s = Match {matchIndexes = [], current = reverse s, original = s}
 
 updateMatch :: Match -> Int -> Match
-updateMatch l x = l {matchIndexes = x:(matchIndexes l), current = drop (x+1) (current l)}
+updateMatch l x = l {matchIndexes = x:matchIndexes l, current = drop (x+1) (current l)}
 
 matchIndexesForChar :: Char -> Match -> Maybe Int
 matchIndexesForChar c line = elemIndex c $ current line
@@ -32,11 +32,10 @@ matchChar c line = do
   return $ updateMatch line idx
 
 charFilter :: Char -> [Match] -> [Match]
-charFilter c lines = catMaybes $ map (matchChar c) lines
+charFilter c = mapMaybe (matchChar c) 
 
 getMatches :: String -> [Match] -> [Match]
-getMatches [] lines = lines
-getMatches (c:cs) lines = getMatches cs $ charFilter c lines
+getMatches cs lines = foldl (flip charFilter) lines cs
 
 getNMatches :: String -> Int -> [String] -> [String]
 getNMatches pattern n corpus = take n $ map original $ sort $ getMatches (reverse pattern) $ map makeMatch corpus
