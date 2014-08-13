@@ -27,7 +27,9 @@ matchIndexesForChar :: Char -> Match -> Maybe Int
 matchIndexesForChar c line = elemIndex c $ current line
 
 matchChar :: Char -> Match -> Maybe Match
-matchChar c line = fmap (updateMatch line) (matchIndexesForChar c line)
+matchChar c line = do
+  idx <- matchIndexesForChar c line
+  return $ updateMatch line idx
 
 charFilter :: Char -> [Match] -> [Match]
 charFilter c lines = catMaybes $ map (matchChar c) lines
