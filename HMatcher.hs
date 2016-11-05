@@ -2,6 +2,7 @@ module HMatcher (getNMatches) where
 
 import Data.Maybe
 import Data.List
+import Data.Char
 
 data Match = Match {
   matchIndexes :: [Int],
@@ -11,32 +12,43 @@ data Match = Match {
 
 instance Ord Match where
   l1 `compare` l2 = index l1 `compare` index l2
-    where 
+    where
       index l = sumIndices l * chunckCount l * originalLength l
       sumIndices l = (+ 1) $ sum $ matchIndexes l
       originalLength l = length $ original l
       chunckCount l = (+ 1) $ length $ filter (> 0) (matchIndexes l)
 
 makeMatch :: String -> Match
-makeMatch s = Match {matchIndexes = [], current = reverse s, original = s}
+makeMatch s = Match {
+  matchIndexes = [],
+  current = reverse s,
+  original = s
+}
 
-updateMatch :: Match -> Int -> Match
-updateMatch l x = l {matchIndexes = x:matchIndexes l, current = drop (x+1) (current l)}
+addIndexToMatch :: Match -> Int -> Match
+addIndexToMatch match idx = match {
+  matchIndexes = idx:matchIndexes match,
+  current = drop (idx+1) (current match)
+}
 
-matchIndexesForChar :: Char -> Match -> Maybe Int
-matchIndexesForChar c line = elemIndex c $ current line
+matchIndexForChar :: Char -> Match -> Maybe Int
+matchIndexForChar c possibleMatch = elemIndex c $ current possibleMatch
 
 matchChar :: Char -> Match -> Maybe Match
-matchChar c line = do
-  idx <- matchIndexesForChar c line
-  return $ updateMatch line idx
+matchChar c possibleMatch = do
+  idx <- matchIndexForChar c possibleMatch
+  return $ addIndexToMatch possibleMatch idx
 
 charFilter :: Char -> [Match] -> [Match]
-charFilter c = mapMaybe (matchChar c) 
+charFilter c = mapMaybe (matchChar c)
 
 getMatches :: String -> [Match] -> [Match]
-getMatches cs lines = foldl (flip charFilter) lines cs
+getMatches searchPattern possibleMatches = foldl (flip charFilter) possibleMatches searchPattern
 
 getNMatches :: String -> Int -> [String] -> [String]
-getNMatches pattern n corpus = take n $ map original $ sort $ getMatches (reverse pattern) $ map makeMatch corpus
+getNMatches searchPattern limit corpus = take limit $
+                                         map original $
+                                         sort $
+                                         getMatches (reverse searchPattern) $
+                                         map makeMatch corpus
 

@@ -2,8 +2,8 @@ import System.Environment
 
 import HMatcher
 
-perform (pattern:n:xs) input = getNMatches pattern (read n :: Int) (lines input)
-perform (pattern:xs) input = getNMatches pattern 10 (lines input)
+perform (searchPattern:limit:xs) input = getNMatches searchPattern (read limit :: Int) (lines input)
+perform (searchPattern:xs) input = getNMatches searchPattern 10 (lines input)
 
 main = do
   input <- getContents
