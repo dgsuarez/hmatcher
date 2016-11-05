@@ -21,7 +21,7 @@ instance Ord Match where
 makeMatch :: String -> Match
 makeMatch s = Match {
   matchIndexes = [],
-  current = reverse s,
+  current = reverse (map toLower s),
   original = s
 }
 
@@ -32,7 +32,7 @@ addIndexToMatch match idx = match {
 }
 
 matchIndexForChar :: Char -> Match -> Maybe Int
-matchIndexForChar c possibleMatch = elemIndex c $ current possibleMatch
+matchIndexForChar c possibleMatch = elemIndex (toLower c) $ current possibleMatch
 
 matchChar :: Char -> Match -> Maybe Match
 matchChar c possibleMatch = do
